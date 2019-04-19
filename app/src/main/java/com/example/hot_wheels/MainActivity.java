@@ -107,10 +107,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initialise() {
-        search_btn.setEnabled(false);
+        if(!bluetoothAdapter.isEnabled()){
+            search_btn.setEnabled(false);
+        }
+        else{
+            search_btn.setEnabled(true);
+        }
+
         status.setText("");
         pair_list.setAdapter(null);
         new_device_list.setAdapter(null);
+
     }
 
     private void init_listeners() {
@@ -121,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
         pair_list=(ListView)findViewById(R.id.list_pair);
         new_device_list=(ListView)findViewById(R.id.list_new);
         //mBTDevices = new ArrayList<>();
-        bluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
+        bluetoothAdapter=BluetoothAdapter.getDefaultAdapter();//1
         pairedDevicesArrayAdapter =new ArrayList<>();
         mNewDevicesArrayAdapter = new ArrayList<>();
         //pair_list.setAdapter(pairedDevicesArrayAdapter);
@@ -161,6 +168,7 @@ public class MainActivity extends AppCompatActivity {
             String device_address=mBTDevice.getAddress();
             Log.d(TAG, "Calling New Activity" );
             initialise();
+
             Intent newintent = new Intent(MainActivity.this, Menu_Select.class);
             newintent.putExtra(EXTRA_ADDRESS,device_address);
             startActivity(newintent);
@@ -188,14 +196,14 @@ public class MainActivity extends AppCompatActivity {
         unregisterReceiver(mBroadcastReceiver1);
         unregisterReceiver(mReceiver);
         //unregisterReceiver(mBroadcastReceiver3);
-        //bluetoothAdapter.cancelDiscovery();*/
+        bluetoothAdapter.cancelDiscovery();
     }
 
     public void btn_on_off(View view) {
         Log.d(TAG, "btn_on_off: Button pressed.");
         initialise();
-        enable_bt();
-        checkBTPermissions();
+        enable_bt();//2
+        checkBTPermissions();//3
     }
 
     private void enable_bt() {

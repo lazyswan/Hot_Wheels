@@ -14,7 +14,9 @@
         android:roundIcon="@mipmap/hot_wheels_logo_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Menu_Select"></activity>
+        <activity android:name=".Log_screen"></activity>
+        <activity android:name=".Obstacle_Avoidance" />
+        <activity android:name=".Menu_Select" />
         <activity android:name=".Communicate" />
         <activity android:name=".MainActivity">
             <intent-filter>

@@ -9,11 +9,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class Communicate extends AppCompatActivity{
+public class Obstacle_Avoidance extends AppCompatActivity {
     //Bluetooth_Setting:---------------------------------
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
     private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
@@ -25,33 +24,34 @@ public class Communicate extends AppCompatActivity{
     private BluetoothChatService mChatService = null;
     private StringBuffer mOutStringBuffer;
     //Bluetooth_Setting:---------------------------------
-
-    // String address = null;
-    Button send_btn,end_btn;
-    TextView status,rxData;
-    EditText editText;
+    byte[] readBuf;
+    Button start_btn,stop_btn;
+    TextView mode_details_tv;
+    //private String mConnectedDeviceAddress = null;
+    public static String EXTRA_ADDRESS = "device_address";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_communicate);
-        Intent internt = getIntent();
-
+        setContentView(R.layout.activity_obstacle__avoidance);
+        Intent intent = getIntent();
+        mConnectedDeviceAddress = intent.getStringExtra(MainActivity.EXTRA_ADDRESS);
         //Bluetooth_Setting:---------------------------------
-        mConnectedDeviceAddress = internt.getStringExtra(MainActivity.EXTRA_ADDRESS);
+        mConnectedDeviceAddress = intent.getStringExtra(MainActivity.EXTRA_ADDRESS);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         //Bluetooth_Setting:---------------------------------
-
-        rxData=(TextView)findViewById(R.id.rxData) ;
-        status=(TextView)findViewById(R.id.status);
-        send_btn=(Button)findViewById(R.id.send_btn);
-        end_btn=(Button)findViewById(R.id.end_btn);
-        editText=(EditText) findViewById(R.id.editText);
-
-        notify_user("Status: Connected to ",mConnectedDeviceAddress,false);
-
+        init_listeners();
     }
 
+    private void init_listeners() {
 
+
+        start_btn=findViewById(R.id.start_button);
+        stop_btn=findViewById(R.id.stop_button);
+        mode_details_tv=findViewById(R.id.tv_mode_details);
+        //rx_data=findViewById(R.id.rx_data);
+    }
+
+//Bluetooth and Thread Communication Code-------------------------------------
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -60,9 +60,6 @@ public class Communicate extends AppCompatActivity{
         }
         mBluetoothAdapter.cancelDiscovery();
     }
-
-
-
 
     @Override
     public void onStart() {
@@ -82,6 +79,63 @@ public class Communicate extends AppCompatActivity{
         connectDevice(false);//Insecure Connection
     }
 
+    private void connectDevice(boolean secure) {
+
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(mConnectedDeviceAddress);
+        mChatService.connect(device, secure);//Thread activity.
+    }
+
+    Handler mHandler=new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(Message msg) {
+
+            switch (msg.what) {
+                case Constants.MESSAGE_STATE_CHANGE:
+                    switch (msg.arg1) {
+                        case BluetoothChatService.STATE_CONNECTED:
+                            notify_user("Status: "," Connected to "+mConnectedDeviceName,false);
+                            break;
+
+                        case BluetoothChatService.STATE_CONNECTING:
+                            notify_user("Status: ", "Connecting...",false);
+                            break;
+
+                        case BluetoothChatService.STATE_LISTEN:
+                        case BluetoothChatService.STATE_NONE:
+                            notify_user(" ", "Unable to Connect.Try Again",false);
+                            break;
+                    }
+                    break;
+                case Constants.MESSAGE_WRITE:
+                    byte[] writeBuf = (byte[]) msg.obj;
+                    // construct a string from the buffer
+                    //String writeMessage = new String(writeBuf);
+                    //mConversationArrayAdapter.add("Me:  " + writeMessage);
+                    notify_user("Status: ","Message Sent",false);
+                    //rx_data.setText("Rx_Data: ");
+                    break;
+                case Constants.MESSAGE_READ:
+                    readBuf = (byte[]) msg.obj;
+                    //readBuf.toString();
+                   String readMessage = new String(readBuf, 0, msg.arg1);
+                    //notify_user(" ",readMessage,false);
+                    //rx_data.setText("Rx_Data: "+readMessage);
+                    // construct a string from the valid bytes in the buffer
+
+                    //notify_user(" ","Incoming Message Ignored",false);
+                    // mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
+                    break;
+                case Constants.MESSAGE_DEVICE_NAME:
+                    // save the connected device's name
+                    mConnectedDeviceName = msg.getData().getString(Constants.DEVICE_NAME);
+                    break;
+                case Constants.MESSAGE_TOAST:
+                    break;
+            }
+
+            return false;
+        }
+    });
 
 
     private void sendMessage(String message) {
@@ -99,95 +153,41 @@ public class Communicate extends AppCompatActivity{
 
             // Reset out string buffer to zero and clear the edit text field
             mOutStringBuffer.setLength(0);
-            editText.setText(mOutStringBuffer);
+            //editText.setText(mOutStringBuffer);
         }
     }
+//Bluetooth and Thread Communication Code-------------------------------------
 
-
-
-    Handler mHandler=new Handler(new Handler.Callback() {
-        @Override
-        public boolean handleMessage(Message msg) {
-
-            switch (msg.what) {
-                case Constants.MESSAGE_STATE_CHANGE:
-                    switch (msg.arg1) {
-                        case BluetoothChatService.STATE_CONNECTED:
-                            notify_user("Status: "," Connected to "+mConnectedDeviceName,false);
-                            //setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
-                            //mConversationArrayAdapter.clear();
-
-                            break;
-                        case BluetoothChatService.STATE_CONNECTING:
-                            notify_user("Status: ", "Connecting...",false);
-                            //setStatus(R.string.title_connecting);
-                            break;
-                        case BluetoothChatService.STATE_LISTEN:
-                        case BluetoothChatService.STATE_NONE:
-                            notify_user(" ", "Unable to Connect.Try Again",false);
-                            //setStatus(R.string.title_not_connected);
-                            break;
-                    }
-                    break;
-                case Constants.MESSAGE_WRITE:
-                    byte[] writeBuf = (byte[]) msg.obj;
-                    // construct a string from the buffer
-                    //String writeMessage = new String(writeBuf);
-                    //mConversationArrayAdapter.add("Me:  " + writeMessage);
-                    notify_user("Status: ","Message Sent",false);
-                    break;
-                case Constants.MESSAGE_READ:
-                    byte[] readBuf = (byte[]) msg.obj;
-                    rxData.setText(" ");
-                    rxData.setText("Rx Msg: "+readBuf.toString());
-                    // construct a string from the valid bytes in the buffer
-                    //String readMessage = new String(readBuf, 0, msg.arg1);
-                    notify_user(" ","Incoming Message Ignored",false);
-                   // mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
-                    break;
-                case Constants.MESSAGE_DEVICE_NAME:
-                    // save the connected device's name
-                    mConnectedDeviceName = msg.getData().getString(Constants.DEVICE_NAME);
-                    break;
-                case Constants.MESSAGE_TOAST:
-                      break;
-            }
-
-            return false;
-        }
-    });
-
-    public void send_btn(View view) {
-
-        String message = editText.getText().toString();
-        sendMessage(message);
-
+    public void start_btn_click(View view) {
+        String start_cmd ="~1@!#";
+        sendMessage(start_cmd);//send 1
     }
 
-    public void end_btn(View view) {
+    public void stop_btn_click(View view) {
+        String stop_cmd = "~0@!#";
+        sendMessage(stop_cmd);//send 0
+    }
+
+    public void exit_btn_click(View view) {
         if (mChatService != null) {
             mChatService.stop();
         }
         mBluetoothAdapter.cancelDiscovery();
-      //  mBluetoothAdapter.disable();//TurnOFF Bluetooth
+        //  mBluetoothAdapter.disable();//TurnOFF Bluetooth
         finish();
     }
 
-    public void notify_user(String prefix,String message,boolean toast) {
+   public void notify_user(String prefix,String message,boolean toast) {
         if (toast) {
             Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
         }
-        status.setText(prefix + message);
+        mode_details_tv.setText(prefix + message);
 
     }
-    private void connectDevice(boolean secure) {
 
-       BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(mConnectedDeviceAddress);
-       mChatService.connect(device, secure);
+    public void log_btn(View view) {
+        Intent newintent = new Intent(this, Log_screen.class);
+        newintent.putExtra(EXTRA_ADDRESS,mConnectedDeviceAddress);
+        startActivity(newintent);
     }
-
-
-
-
-
 }

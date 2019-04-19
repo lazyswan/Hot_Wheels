@@ -14,7 +14,7 @@ public class Menu_Select extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu__select);
         Intent internt = getIntent();
-        mConnectedDeviceAddress = internt.getStringExtra(MainActivity.EXTRA_ADDRESS);
+        mConnectedDeviceAddress = internt.getStringExtra(EXTRA_ADDRESS);
     }
 
     public void communicate_click(View view) {
@@ -24,6 +24,9 @@ public class Menu_Select extends AppCompatActivity {
     }
 
     public void obstacle_avoidance_click(View view) {
+        Intent newintent = new Intent(Menu_Select.this, Obstacle_Avoidance.class);
+        newintent.putExtra(EXTRA_ADDRESS,mConnectedDeviceAddress);
+        startActivity(newintent);
     }
 
     public void self_drive_click(View view) {

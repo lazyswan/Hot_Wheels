@@ -7,13 +7,15 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.Toast;
 
-public class Communicate extends AppCompatActivity{
+import java.util.ArrayList;
+
+public class Log_screen extends AppCompatActivity {
     //Bluetooth_Setting:---------------------------------
     private static final int REQUEST_CONNECT_DEVICE_SECURE = 1;
     private static final int REQUEST_CONNECT_DEVICE_INSECURE = 2;
@@ -25,30 +27,25 @@ public class Communicate extends AppCompatActivity{
     private BluetoothChatService mChatService = null;
     private StringBuffer mOutStringBuffer;
     //Bluetooth_Setting:---------------------------------
+    ListView logs_lv=null;
+   //Adapter for conversation thread.
+    private ArrayAdapter<String> mConversationArrayAdapter;
 
-    // String address = null;
-    Button send_btn,end_btn;
-    TextView status,rxData;
-    EditText editText;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_communicate);
-        Intent internt = getIntent();
-
+        setContentView(R.layout.activity_log_screen);
+        Intent intent = getIntent();
+        mConnectedDeviceAddress = intent.getStringExtra(MainActivity.EXTRA_ADDRESS);
         //Bluetooth_Setting:---------------------------------
-        mConnectedDeviceAddress = internt.getStringExtra(MainActivity.EXTRA_ADDRESS);
+        mConnectedDeviceAddress = intent.getStringExtra(MainActivity.EXTRA_ADDRESS);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         //Bluetooth_Setting:---------------------------------
 
-        rxData=(TextView)findViewById(R.id.rxData) ;
-        status=(TextView)findViewById(R.id.status);
-        send_btn=(Button)findViewById(R.id.send_btn);
-        end_btn=(Button)findViewById(R.id.end_btn);
-        editText=(EditText) findViewById(R.id.editText);
-
-        notify_user("Status: Connected to ",mConnectedDeviceAddress,false);
-
+        //logs=new ArrayList<String>();
+        //adapter=new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,logs);
+        logs_lv=findViewById(R.id.log_list);
+        //logs_lv.setAdapter(adapter);
     }
 
 
@@ -76,6 +73,8 @@ public class Communicate extends AppCompatActivity{
     }
 
     private void setupChat() {
+        mConversationArrayAdapter = new ArrayAdapter<String>(this,R.layout.activity_log_screen);
+        logs_lv.setAdapter(mConversationArrayAdapter);
         mChatService = new BluetoothChatService(this, mHandler);
         // Initialize the buffer for outgoing messages
         mOutStringBuffer = new StringBuffer("");
@@ -84,7 +83,7 @@ public class Communicate extends AppCompatActivity{
 
 
 
-    private void sendMessage(String message) {
+    /*private void sendMessage(String message) {
         // Check that we're actually connected before trying anything
         if (mChatService.getState() != BluetoothChatService.STATE_CONNECTED) {
             notify_user("Status: ","Not Connected!.Try Again",false);
@@ -99,10 +98,10 @@ public class Communicate extends AppCompatActivity{
 
             // Reset out string buffer to zero and clear the edit text field
             mOutStringBuffer.setLength(0);
-            editText.setText(mOutStringBuffer);
+            //editText.setText(mOutStringBuffer);
         }
     }
-
+*/
 
 
     Handler mHandler=new Handler(new Handler.Callback() {
@@ -113,81 +112,63 @@ public class Communicate extends AppCompatActivity{
                 case Constants.MESSAGE_STATE_CHANGE:
                     switch (msg.arg1) {
                         case BluetoothChatService.STATE_CONNECTED:
-                            notify_user("Status: "," Connected to "+mConnectedDeviceName,false);
+                            Log.i("handler: ","STATE Connected");
+                            notify_user("Status: "," Connected to "+mConnectedDeviceName,true);
                             //setStatus(getString(R.string.title_connected_to, mConnectedDeviceName));
-                            //mConversationArrayAdapter.clear();
+                            mConversationArrayAdapter.clear();
 
                             break;
                         case BluetoothChatService.STATE_CONNECTING:
-                            notify_user("Status: ", "Connecting...",false);
+                            Log.i("handler: ","STATE Connecting");
                             //setStatus(R.string.title_connecting);
                             break;
                         case BluetoothChatService.STATE_LISTEN:
                         case BluetoothChatService.STATE_NONE:
-                            notify_user(" ", "Unable to Connect.Try Again",false);
+                            //notify_user(" ", "Unable to Connect.Try Again",false);
                             //setStatus(R.string.title_not_connected);
                             break;
                     }
                     break;
                 case Constants.MESSAGE_WRITE:
                     byte[] writeBuf = (byte[]) msg.obj;
-                    // construct a string from the buffer
-                    //String writeMessage = new String(writeBuf);
-                    //mConversationArrayAdapter.add("Me:  " + writeMessage);
-                    notify_user("Status: ","Message Sent",false);
+                    Log.i("handler: ","MESSAGE_WRITE");
                     break;
                 case Constants.MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
-                    rxData.setText(" ");
-                    rxData.setText("Rx Msg: "+readBuf.toString());
-                    // construct a string from the valid bytes in the buffer
-                    //String readMessage = new String(readBuf, 0, msg.arg1);
-                    notify_user(" ","Incoming Message Ignored",false);
-                   // mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
+                    String readMessage = new String(readBuf, 0, msg.arg1);
+                    Log.i("handler: ","MESSAGE_READ");
+                    mConversationArrayAdapter.add(mConnectedDeviceName + ":  " + readMessage);
                     break;
                 case Constants.MESSAGE_DEVICE_NAME:
                     // save the connected device's name
                     mConnectedDeviceName = msg.getData().getString(Constants.DEVICE_NAME);
                     break;
                 case Constants.MESSAGE_TOAST:
-                      break;
+                    break;
             }
 
             return false;
         }
     });
 
-    public void send_btn(View view) {
+    private void connectDevice(boolean secure) {
 
-        String message = editText.getText().toString();
-        sendMessage(message);
-
+        BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(mConnectedDeviceAddress);
+        mChatService.connect(device, secure);
     }
-
-    public void end_btn(View view) {
-        if (mChatService != null) {
-            mChatService.stop();
-        }
-        mBluetoothAdapter.cancelDiscovery();
-      //  mBluetoothAdapter.disable();//TurnOFF Bluetooth
-        finish();
-    }
-
     public void notify_user(String prefix,String message,boolean toast) {
         if (toast) {
             Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
         }
-        status.setText(prefix + message);
+       // status.setText(prefix + message);
 
     }
-    private void connectDevice(boolean secure) {
 
-       BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(mConnectedDeviceAddress);
-       mChatService.connect(device, secure);
+    public void exit_log_btn(View view) {
+        if (mChatService != null) {
+            mChatService.stop();
+        }
+        mBluetoothAdapter.cancelDiscovery();
+        finish();
     }
-
-
-
-
-
 }
