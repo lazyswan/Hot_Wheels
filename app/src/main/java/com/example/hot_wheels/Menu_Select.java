@@ -30,6 +30,9 @@ public class Menu_Select extends AppCompatActivity {
     }
 
     public void self_drive_click(View view) {
+        Intent newintent = new Intent(Menu_Select.this, Navigate.class);
+        newintent.putExtra(EXTRA_ADDRESS,mConnectedDeviceAddress);
+        startActivity(newintent);
     }
 
     public void exit_btn(View view) {

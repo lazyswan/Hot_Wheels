@@ -107,10 +107,18 @@
                 android:visibility="invisible" />
 
             <TextView
-                android:id="@+id/geo_tv"
+                android:id="@+id/long_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="GeoS:"
+                android:text="Long: "
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/lat_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Lat:"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
