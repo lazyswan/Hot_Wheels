@@ -44,7 +44,7 @@ public class Obstacle_Avoidance extends AppCompatActivity {
     boolean start_conversion=true;
     //int rx_buff_ptr;
     Button start_btn,stop_btn;
-    TextView mode_details_tv,fs_val,ls_val,rs_val,bs_val,lat_val,long_val;
+    TextView mode_details_tv,fs_val,ls_val,rs_val,bs_val,lat_val,long_val,compass_val,distance_tv,bearing_angle_tv;
    public static String EXTRA_ADDRESS = "device_address";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +72,10 @@ public class Obstacle_Avoidance extends AppCompatActivity {
         bs_val=findViewById(R.id.bs_tv);
         long_val=findViewById(R.id.long_id);
         lat_val=findViewById(R.id.lat_id);
+        compass_val=findViewById(R.id.compass_id);
+        distance_tv=findViewById(R.id.distance_id);
+        bearing_angle_tv=findViewById(R.id.bearing_angle_id);
+
 
 
     }
@@ -174,8 +178,11 @@ public class Obstacle_Avoidance extends AppCompatActivity {
             rs_val.setText("RS: "+readMessage.substring(readMessage.indexOf('R')+1,readMessage.indexOf('F')));
             bs_val.setText("BS: "+readMessage.substring(readMessage.indexOf('B')+1,readMessage.indexOf('@')));
             lat_val.setText("Lat: "+readMessage.substring(readMessage.indexOf('@')+1,readMessage.indexOf('!')));
-            long_val.setText("Long: "+readMessage.substring(readMessage.indexOf('!')+1,readMessage.indexOf('#')));
-       // geo_val.setText("Lat: "+readMessage.substring(readMessage.indexOf('!')+1,readMessage.indexOf('#'))+
+            long_val.setText("Long: "+readMessage.substring(readMessage.indexOf('!')+1,readMessage.indexOf('C')));
+            compass_val.setText("Compass Angle: "+readMessage.substring(readMessage.indexOf('C')+1,readMessage.indexOf('^')));
+            bearing_angle_tv.setText("Bearing Angle: "+readMessage.substring(readMessage.indexOf('^')+1,readMessage.indexOf('$')));
+            distance_tv.setText("Distance: "+readMessage.substring(readMessage.indexOf('$')+1,readMessage.indexOf('#')));
+            // geo_val.setText("Lat: "+readMessage.substring(readMessage.indexOf('!')+1,readMessage.indexOf('#'))+
               //  " Long: "+readMessage.substring(readMessage.indexOf('@')+1,readMessage.indexOf('!')));
         //bs_val.setText("BS: "+readMessage.substring(readMessage.indexOf('B'+1),readMessage.indexOf('#')));
     }

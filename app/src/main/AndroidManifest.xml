@@ -11,8 +11,9 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/hot_wheels_logo"
@@ -35,7 +36,7 @@
 
         <activity
             android:name=".Navigate"
-            android:label="@string/title_activity_navigate"></activity>
+            android:label="@string/title_activity_navigate" />
         <activity android:name=".Log_screen" />
         <activity android:name=".Obstacle_Avoidance" />
         <activity android:name=".Menu_Select" />

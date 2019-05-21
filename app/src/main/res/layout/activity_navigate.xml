@@ -1,35 +1,104 @@
 <?xml version="1.0" encoding="utf-8"?>
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
+
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/map"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Navigate" >
+    tools:context=".Navigate">
 
-    <Button
-        android:id="@+id/start_trip_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right|top"
-        android:text="Start Trip"
-        android:onClick="start_trip_click"
-        android:padding="10dp"
-        android:layout_marginTop="20dp"
-        android:paddingRight="10dp"/>
-
-    <Button
-        android:id="@+id/end_trip_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="left|top"
-        android:text="End Trip"
-        android:onClick="end_trip_click"
-        android:padding="10dp"
-        android:layout_marginTop="20dp"
-        android:paddingRight="10dp"/>
+    <RelativeLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
 
 
+        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:map="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="386dp"
+            android:layout_height="457dp"
+            tools:context=".Navigate">
 
-</fragment>
+            <Button
+                android:id="@+id/start_trip_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|top"
+                android:layout_marginTop="20dp"
+                android:onClick="start_trip_click"
+                android:padding="10dp"
+                android:paddingRight="10dp"
+                android:text="Start Trip"
+                android:textStyle="normal" />
+
+            <Button
+                android:id="@+id/end_trip_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|top"
+                android:layout_marginTop="20dp"
+                android:onClick="end_trip_click"
+                android:padding="10dp"
+                android:paddingRight="10dp"
+                android:text="End Trip"
+                android:textStyle="normal" />
+
+
+        </fragment>
+
+        <LinearLayout
+            android:layout_width="388dp"
+            android:layout_height="239dp"
+            android:layout_below="@+id/map"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="17dp"
+            android:layout_marginBottom="2dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/car_location_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Lat: "
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/car_bearing_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Bearing Angle: "
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/car_heading_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Heading Angle: "
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/distance_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Distance: "
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+    </RelativeLayout>
+</android.support.constraint.ConstraintLayout>

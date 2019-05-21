@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">hot_wheels</string>
     <string name="title_activity_navigate">Map</string>
+    <string name="title_activity_test__vigi">Map</string>
 </resources>
