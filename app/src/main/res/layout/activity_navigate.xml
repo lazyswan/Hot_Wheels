@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/orange"
     tools:context=".Navigate">
 
     <RelativeLayout
@@ -55,7 +56,17 @@
                 android:text="End Trip"
                 android:textStyle="normal" />
 
-
+            <Button
+                android:id="@+id/reconnect_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|bottom"
+                android:layout_marginTop="20dp"
+                android:onClick="reconnect_btn_click"
+                android:padding="10dp"
+                android:paddingRight="10dp"
+                android:text="Reconnect"
+                android:textStyle="normal" />
         </fragment>
 
         <LinearLayout
@@ -72,6 +83,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Lat: "
+                android:textColor="@color/black_o"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
@@ -80,6 +92,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Bearing Angle: "
+                android:textColor="@color/black_o"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
@@ -88,6 +101,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Heading Angle: "
+                android:textColor="@color/black_o"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
@@ -96,7 +110,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Distance: "
+                android:textColor="@color/black_o"
                 android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/status_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Status:"
+                android:textColor="@color/black_o"
                 android:textStyle="bold" />
 
         </LinearLayout>

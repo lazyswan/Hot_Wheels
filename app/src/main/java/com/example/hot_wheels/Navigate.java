@@ -42,10 +42,11 @@ public class Navigate extends FragmentActivity implements OnMapReadyCallback {
     private StringBuffer mOutStringBuffer;
     public static String EXTRA_ADDRESS = "device_address";
     boolean parsing_finished = false;
+    private String connection_status;
     //Bluetooth_Setting:---------------------------------
 
     //Text View:------------------------------------------
-    TextView car_lat_long, dis, b_angle, h_angle;
+    TextView car_lat_long, dis, b_angle, h_angle, bt_status;
 
     //Text View:------------------------------------------
 
@@ -70,6 +71,14 @@ public class Navigate extends FragmentActivity implements OnMapReadyCallback {
     private double destn_longitude = 0.0;
     private String src_lat = "0.0";
     private String src_long = "0.0";
+
+    private Double src_lat_for_reconnect=0.0;
+    private Double src_long_for_reconnect=0.0;
+    private Double dest_lat_for_reconnect=0.0;
+    private Double dest_long_for_reconnect=0.0;
+
+    LatLng hot_wheels_str_pt;
+    LatLng hot_wheels_dstn_pt;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,7 +110,7 @@ public class Navigate extends FragmentActivity implements OnMapReadyCallback {
         //ls=findViewById(R.id.left_sensor_id);
         b_angle = findViewById(R.id.car_bearing_id);
         h_angle = findViewById(R.id.car_heading_id);
-
+        bt_status=findViewById(R.id.status_id);
         //Text view init------------------
         coordinate_list = new ArrayList<>();
         start_trip = false;
@@ -156,6 +165,7 @@ public class Navigate extends FragmentActivity implements OnMapReadyCallback {
         src_lat = readMessage.substring(readMessage.indexOf('@') + 1, readMessage.indexOf('!'));
         src_long = readMessage.substring(readMessage.indexOf('!') + 1, readMessage.indexOf('C'));
         car_lat_long.setText("Lat: " + src_lat + " Long: " + src_long);
+        bt_status.setText("Status: "+connection_status);
         if (Double.parseDouble(src_lat) != 36.000000) {
             parsing_finished = true;
             Log.i("parse_msg() ", "GPS Location Valid ");
@@ -189,11 +199,14 @@ public class Navigate extends FragmentActivity implements OnMapReadyCallback {
                 case Constants.MESSAGE_STATE_CHANGE:
                     switch (msg.arg1) {
                         case BluetoothChatService.STATE_CONNECTED:
+                            connection_status=" Connection OK!";
                             break;
                         case BluetoothChatService.STATE_CONNECTING:
+                            connection_status=" Connecting...";
                             break;
                         case BluetoothChatService.STATE_LISTEN:
                         case BluetoothChatService.STATE_NONE:
+                            connection_status=" Disconnected";
                             break;
                     }
                     break;
@@ -260,20 +273,33 @@ public class Navigate extends FragmentActivity implements OnMapReadyCallback {
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-
+                bt_status.setText("Status: "+connection_status);
                 if (parsing_finished && null == source_marker) {
-                    LatLng hot_wheels_str_pt = new LatLng(Double.parseDouble(src_lat), Double.parseDouble(src_long));
-                    source_marker = mMap.addMarker(new MarkerOptions().position(hot_wheels_str_pt).title("Hot Wheels Start Point").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                    src_lat_for_reconnect=Double.parseDouble(src_lat);
+                    src_long_for_reconnect=Double.parseDouble(src_long);
+                    hot_wheels_str_pt = new LatLng(src_lat_for_reconnect, src_long_for_reconnect);
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(hot_wheels_str_pt, 17f));
+                    //
+                    source_marker = mMap.addMarker(new MarkerOptions().position(hot_wheels_str_pt).title("Hot Wheels Start Point").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
                 }
-                if (null != destination_marker) {
+                if (null != destination_marker && !start_trip) {
                     destination_marker.remove();
                 }
+                /*if(null != source_marker){
+                    source_marker.remove();
+                }*/
                 if (!start_trip && parsing_finished) {
-                    destination_marker = mMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                    dest_lat_for_reconnect=latLng.latitude;
+                    dest_long_for_reconnect=latLng.longitude;
+                    hot_wheels_dstn_pt=new LatLng(dest_lat_for_reconnect,dest_long_for_reconnect);
+                    destination_marker = mMap.addMarker(new MarkerOptions().position(hot_wheels_dstn_pt).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
                     destination_marker.setTitle("Destination");
                 }
 
+
+                //source_marker = mMap.addMarker(new MarkerOptions().position(hot_wheels_str_pt).title("Hot Wheels Start Point").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+               // destination_marker = mMap.addMarker(new MarkerOptions().position(hot_wheels_dstn_pt).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                //destination_marker.setTitle("Destination");
                 Log.i("Destination Position: ", latLng.toString());
             }
         });
@@ -314,9 +340,31 @@ public class Navigate extends FragmentActivity implements OnMapReadyCallback {
         source_marker.remove();
         source_marker = null;
         destination_marker.remove();
-        //destination_marker = null;
+        destination_marker = null;
         //mMap.clear();
 
+
+    }
+
+    public void reconnect_btn_click(View view) {
+
+            mChatService.stop();
+            Log.i("mchat = =null","############");
+            setupChat();
+            if(start_trip && null!=destination_marker){
+                destination_marker.remove();
+                destination_marker = mMap.addMarker(new MarkerOptions().position(hot_wheels_dstn_pt).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                destination_marker.setTitle("Destination");
+                Log.i("dmarker set = =null","############");
+            }
+            if(null!=source_marker){
+                source_marker.remove();
+                source_marker = mMap.addMarker(new MarkerOptions().position(hot_wheels_str_pt).title("Hot Wheels Start Point").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                Log.i("s_marker_set = =null","############");
+            }
+
+
+        bt_status.setText("Status: "+connection_status);
 
     }
 }
